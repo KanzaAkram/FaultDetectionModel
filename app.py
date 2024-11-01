@@ -1,4 +1,3 @@
-
 from tensorflow.keras.applications.vgg16 import preprocess_input
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +9,7 @@ from io import BytesIO
 from PIL import Image
 import logging
 import nest_asyncio
+import os
 
 # Apply nest_asyncio to avoid event loop issues
 nest_asyncio.apply()
@@ -30,9 +30,9 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-# Load the model
+# Load the model using a relative path
 try:
-    model = load_model('/content/drive/MyDrive/best_model.keras')  # Confirm the model path is correct
+    model = load_model("./best_model.keras")  # Use a relative path for deployment compatibility
     logger.info("Model loaded successfully.")
 except Exception as e:
     logger.error(f"Failed to load model: {e}")
@@ -159,4 +159,3 @@ async def predict(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"Prediction failed: {e}")
         raise HTTPException(status_code=500, detail="Prediction failed")
-    
