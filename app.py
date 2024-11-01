@@ -31,16 +31,16 @@ app.add_middleware(
 )
 
 # Load the model using a relative path
+model_path = os.getenv("MODEL_PATH", "best_model.keras")  # Use environment variable or default path
 try:
-    model = load_model("best_model.keras")  # Use a relative path for deployment compatibility
+    model = load_model(model_path)
     logger.info("Model loaded successfully.")
 except Exception as e:
     logger.error(f"Failed to load model: {e}")
-    raise
+    raise HTTPException(status_code=500, detail="Model loading failed")
 
 # Image dimensions
-img_height = 244
-img_width = 244
+img_height, img_width = 244, 244
 
 # Define class names
 class_names = ['Bird-drop', 'Clean', 'Dusty', 'Electrical-damage', 'Physical-Damage', 'Snow-Covered']
@@ -139,8 +139,7 @@ async def predict(file: UploadFile = File(...)):
         predictions = model.predict(img_array)
 
         # Apply softmax to ensure we handle multi-class predictions correctly
-        if predictions.shape[-1] > 1:
-            predictions = np.exp(predictions) / np.sum(np.exp(predictions), axis=1)
+        predictions = np.exp(predictions) / np.sum(np.exp(predictions), axis=1) if predictions.shape[-1] > 1 else predictions
 
         confidence = float(np.max(predictions))
         predicted_class = np.argmax(predictions, axis=1)[0]
