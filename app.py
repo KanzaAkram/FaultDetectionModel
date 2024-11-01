@@ -32,7 +32,7 @@ app.add_middleware(
 
 # Load the model using a relative path
 try:
-    model = load_model("./best_model.keras")  # Use a relative path for deployment compatibility
+    model = load_model("best_model.keras")  # Use a relative path for deployment compatibility
     logger.info("Model loaded successfully.")
 except Exception as e:
     logger.error(f"Failed to load model: {e}")
