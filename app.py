@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import numpy as np
 from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
 from io import BytesIO
 from PIL import Image
 import logging
@@ -30,8 +29,14 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-# Load the model using a relative path
-model_path = os.getenv("MODEL_PATH", "best_model.keras")  # Use environment variable or default path
+# Load the model using a specified path or default to current directory
+model_path = os.path.join(os.getcwd(), os.getenv("MODEL_PATH", "best_model.keras"))  # Use absolute path
+
+# Check if the model file exists before attempting to load
+if not os.path.isfile(model_path):
+    logger.error(f"Model file not found at: {model_path}")
+    raise HTTPException(status_code=500, detail="Model file not found.")
+
 try:
     model = load_model(model_path)
     logger.info("Model loaded successfully.")
